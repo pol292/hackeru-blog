@@ -87,6 +87,13 @@
     <main class="py-4">
         @yield('content')
     </main>
+
+    <div class="loader" hidden>
+        <div class="d-flex align-items-center">
+            <strong>Loading...</strong>
+            <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>
+        </div>
+    </div>
 </div>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 @stack('scripts')

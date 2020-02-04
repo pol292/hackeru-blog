@@ -37,16 +37,19 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        if (!$request->ajax()) {
-            abort(404);
+        if ($request->ajax()) {
+            $this->postValidate($request, $inputs);
+
+            if (Auth::user()->posts()->create($inputs)) {
+                return [
+                    'title' => 'Success',
+                    'message' => 'The post was added successful',
+                ];
+            }
+
+            abort(500, 'Error in post create');
         }
-
-        $request->validate([
-            'title' => 'required',
-            'description' => 'required',
-        ]);
-
-        Auth::user()->posts()->create($request->all());
+        abort(404);
     }
 
     /**
@@ -91,5 +94,17 @@ class PostController extends Controller
     public function destroy(Post $post)
     {
         $post->destroy();
+    }
+
+
+    private function postValidate(&$request, &$inputs)
+    {
+        $request->validate([
+            'title' => 'required',
+            'description' => 'required',
+        ]);
+
+        $inputs = $request->all();
+        $inputs['tags'] = empty($inputs['tags']) ? [] : explode(',', $inputs['tags']);
     }
 }

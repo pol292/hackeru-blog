@@ -32,16 +32,51 @@ function url($url) {
     return URL + '/' + $url;
 }
 
+function createErrorList(errors) {
+    let $ul = document.createElement('ul');
+    for (error in errors) {
+        let $li = document.createElement('li');
+        $li.innerText = errors[error];
+        $ul.appendChild($li);
+    }
+    return $ul;
+}
+
 /**
  *
  * @param ele
  * @param success
  * @param error
  */
-function ajax(ele, success, error = function () {
-}) {
-    if ($(ele).valid()) { // validate form before send ajax
+function ajax(ele, success, error) {
 
+    if ($(ele).valid()) { // validate form before send ajax
+        $('.loader').removeAttr('hidden');
+        if (success == undefined) {
+            success = function (response) {
+                if (response.title) {
+                    toastr.success(response.message, response.title);
+                } else {
+                    toastr.success(response.message);
+                }
+            }
+        }
+
+        if (error == undefined) {
+            error = function (response) {
+                let data = response.responseJSON;
+                if (data.errors) {
+                    let errors = createErrorList(data.errors);
+                    toastr.error(errors, data.message);
+
+                } else if (data.message) {
+                    toastr.error(data.message);
+
+                } else {
+                    toastr.error('משהו הישתבש אנא נסה שוב מאוחר יותר');
+                }
+            }
+        }
         /*
         set default method or from data-method or method or get
          */
@@ -59,6 +94,8 @@ function ajax(ele, success, error = function () {
             method: method,
             success: success,
             error: error,
+        }).done(function () {
+            $('.loader').attr('hidden','hidden');
         });
     }
 }
@@ -70,11 +107,7 @@ function create_post() {
     $('#create_post').on('submit', function (e) {
         e.preventDefault();
         //toastr lib for popup massages error success and more
-        ajax(this, function (json) {
-            toastr.success('yay');
-        }, function (error) {
-            toastr.error(error.responseJSON.message);
-        });
+        ajax(this);
     }).validate({  // create validation for form
         rules: {
             title: {
