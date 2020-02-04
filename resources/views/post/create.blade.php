@@ -9,7 +9,7 @@
 
                     <div class="card-body">
 
-                        <form id="create_post" action="{{route('post.store')}}" method="post" >
+                        <form id="create_post" action="{{route('post.store')}}" method="post">
                             <div class="form-group">
                                 <label for="title">Title:</label>
                                 <input type="text" name="title" class="form-control" id="title" placeholder="title" required>

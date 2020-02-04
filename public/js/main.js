@@ -1,4 +1,12 @@
+const URL = $('meta[name="url"]').attr('content');  /* Get url form meta url */
+
+/**
+ *  init all method for any pages in exsits suport for this page
+ */
 function init() {
+    /*
+        set global ajax csrf token
+     */
     $.ajaxSetup({
         headers: {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -6,16 +14,12 @@ function init() {
     });
 
     let arr = [
-        {fnc: create_post, ele: '#create_post'}
+        {func: create_post, ele: '#create_post'}
     ];
     for (let obj of arr) {
-        run(obj.ele, obj.fnc);
-    }
-}
-
-function run(ele, func) {
-    if ($(ele).length) {
-        func();
+        if ($(obj.ele).length) {
+            obj.func();
+        }
     }
 }
 
@@ -25,31 +29,53 @@ function run(ele, func) {
  * @returns {string}
  */
 function url($url) {
-    const URL = $('meta[name="url"]').attr('content');
     return URL + '/' + $url;
 }
 
+/**
+ *
+ * @param ele
+ * @param success
+ * @param error
+ */
+function ajax(ele, success, error = function () {
+}) {
+    if ($(ele).valid()) { // validate form before send ajax
+
+        /*
+        set default method or from data-method or method or get
+         */
+        let method = 'get';
+        if ($(ele).data('method')) {
+            method = $(ele).data('method')
+        } else if ($(ele).attr('method')) {
+            method = $(ele).attr('method')
+        }
+
+        $.ajax({
+            url: $(ele).attr('action'),
+            data: $(ele).serialize(),
+            dataType: $(ele).data('data-type') ? $(ele).data('data-type') : 'json', // default data json
+            method: method,
+            success: success,
+            error: error,
+        });
+    }
+}
+
+/**
+ * method for create post page and form
+ */
 function create_post() {
     $('#create_post').on('submit', function (e) {
         e.preventDefault();
-        if ($(this).valid()) {
-
-            $.ajax({
-                url: $(this).attr('action'),
-                data: $(this).serialize(),
-                dataType: 'json',
-                method: 'post',
-                success: function () {
-
-                },
-                error: function (error) {
-                    //error.responseJSON.errors
-                    toastr.error(error.responseJSON.message);
-                },
-            });
-
-        }
-    }).validate({
+        //toastr lib for popup massages error success and more
+        ajax(this, function (json) {
+            toastr.success('yay');
+        }, function (error) {
+            toastr.error(error.responseJSON.message);
+        });
+    }).validate({  // create validation for form
         rules: {
             title: {
                 required: true,
@@ -63,4 +89,7 @@ function create_post() {
 }
 
 
+/*
+start run the project js
+ */
 init();
